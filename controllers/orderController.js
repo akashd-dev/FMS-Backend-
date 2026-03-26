@@ -38,10 +38,34 @@ exports.getMyOrdersAsBuyer = async (req, res) => {
 exports.getOrdersForFarmer = async (req, res) => {
   try {
     const orders = await Order.find({ farmerId: req.session.user.id })
-      .populate('cropId', 'name')
-      .populate('buyerId', 'name');
+      .populate('buyerId', 'name location')   // Important: populate buyer details
+      .populate('cropId', 'name');
     res.json({ success: true, orders });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+// Get buyers who ordered from this farmer
+exports.getMyBuyers = async (req, res) => {
+  try {
+    const farmerId = req.session.user.id;
+
+    const orders = await Order.find({ farmer: farmerId })
+      .populate('buyer', 'name email location');
+
+    // Remove duplicates buyers
+    const buyersMap = new Map();
+
+    orders.forEach(order => {
+      if (order.buyer) {
+        buyersMap.set(order.buyer._id.toString(), order.buyer);
+      }
+    });
+
+    const buyers = Array.from(buyersMap.values());
+
+    res.json({ buyers });
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching buyers' });
   }
 };

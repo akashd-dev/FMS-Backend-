@@ -8,7 +8,7 @@ const { Server } = require('socket.io');
 
 const User = require('./models/User');
 const bcrypt = require('bcryptjs');
-
+const dashboardRoutes = require('./routes/dashboardRoutes');
 dotenv.config();
 
 const app = express();
@@ -74,6 +74,7 @@ app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/weather', require('./routes/weatherRoutes'));
+app.use('/api/dashboard', dashboardRoutes);
 
 // Socket.IO Real-time Chat
 io.on('connection', (socket) => {
