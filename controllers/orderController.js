@@ -27,8 +27,8 @@ exports.placeOrder = async (req, res) => {
 exports.getMyOrdersAsBuyer = async (req, res) => {
   try {
     const orders = await Order.find({ buyerId: req.session.user.id })
-      .populate('cropId', 'name price image')
-      .populate('farmerId', 'name');
+      .populate('farmerId', 'name location')   // Important
+      .populate('cropId', 'name');
     res.json({ success: true, orders });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

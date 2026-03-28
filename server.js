@@ -75,27 +75,33 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/weather', require('./routes/weatherRoutes'));
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/inquiries', require('./routes/inquiryRoutes'));
 
-// Socket.IO Real-time Chat
+
+// Socket.IO - Clean & Reliable Version
 io.on('connection', (socket) => {
   console.log('🔌 User connected to socket');
 
   socket.on('joinChat', ({ senderId, receiverId }) => {
+    if (!senderId || !receiverId) return;
     const room = [senderId, receiverId].sort().join('-');
     socket.join(room);
-    console.log(`Joined room: ${room}`);
+    console.log(`✅ Joined room: ${room}`);
   });
 
   socket.on('sendMessage', async (data) => {
     const { senderId, receiverId, message } = data;
+    if (!senderId || !receiverId || !message) return;
+
     try {
-      const newMsg = new Message({ senderId, receiverId, message });
+      const newMsg = new Message({ senderId, receiverId, message: message.trim() });
       await newMsg.save();
 
       const room = [senderId, receiverId].sort().join('-');
-      io.to(room).emit('receiveMessage', newMsg);
+      io.to(room).emit('receiveMessage', newMsg);   // Send to both
+      console.log(`📨 Message sent to room ${room}`);
     } catch (err) {
-      console.error('Message save error:', err);
+      console.error('Message error:', err);
     }
   });
 
