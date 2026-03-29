@@ -27,7 +27,7 @@ exports.placeOrder = async (req, res) => {
 exports.getMyOrdersAsBuyer = async (req, res) => {
   try {
     const orders = await Order.find({ buyerId: req.session.user.id })
-      .populate('farmerId', 'name location')   // Important
+      .populate('farmerId', 'name location phone')   // Important
       .populate('cropId', 'name');
     res.json({ success: true, orders });
   } catch (error) {
@@ -38,7 +38,7 @@ exports.getMyOrdersAsBuyer = async (req, res) => {
 exports.getOrdersForFarmer = async (req, res) => {
   try {
     const orders = await Order.find({ farmerId: req.session.user.id })
-      .populate('buyerId', 'name location')   // Important: populate buyer details
+      .populate('buyerId', 'name location phone')   // Important: populate buyer details
       .populate('cropId', 'name');
     res.json({ success: true, orders });
   } catch (error) {
@@ -67,5 +67,25 @@ exports.getMyBuyers = async (req, res) => {
     res.json({ buyers });
   } catch (err) {
     res.status(500).json({ message: 'Error fetching buyers' });
+  }
+};
+
+
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true }
+    ).populate('buyerId', 'name').populate('cropId', 'name');
+
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    res.json({ success: true, order });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 };

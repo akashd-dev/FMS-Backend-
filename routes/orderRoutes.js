@@ -7,5 +7,6 @@ router.post('/place', isAuthenticated, orderController.placeOrder);
 router.get('/my', isAuthenticated, orderController.getMyOrdersAsBuyer);
 router.get('/farmer', isAuthenticated, orderController.getOrdersForFarmer);
 router.get('/my-buyers', isAuthenticated, orderController.getMyBuyers);
+router.put('/:orderId/status', isAuthenticated, orderController.updateOrderStatus);
 
 module.exports = router;
